@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Pedagógico - Generador de Competencias</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Asistente Pedagógico</h1>
+        <p class="subtitle">Generador de Competencias y Criterios de Evaluación</p>
+
+        <form id="competenciaForm">
+            <div class="form-group">
+                <label for="ciclo">Ciclo Educativo:</label>
+                <select id="ciclo" name="ciclo" required>
+                    <option value="">Selecciona un ciclo</option>
+                    <option value="III">III Ciclo (1° y 2° grado)</option>
+                    <option value="IV">IV Ciclo (3° y 4° grado)</option>
+                    <option value="V">V Ciclo (5° y 6° grado)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="area">Área Curricular:</label>
+                <select id="area" name="area" required>
+                    <option value="">Selecciona un área</option>
+                    <option value="Comunicación">Comunicación</option>
+                    <option value="Matemática">Matemática</option>
+                    <option value="Personal Social">Personal Social</option>
+                    <option value="Ciencia y Tecnología">Ciencia y Tecnología</option>
+                    <option value="Educación Religiosa">Educación Religiosa</option>
+                    <option value="Arte y Cultura">Arte y Cultura</option>
+                    <option value="Educación Física">Educación Física</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tema">Tema de la Unidad:</label>
+                <input type="text" id="tema" name="tema" placeholder="Ej: Conservando la naturaleza prevenimos los desastres" required>
+            </div>
+
+            <button type="submit" id="submitBtn">Generar Documento</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generando documento con IA, por favor espera...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+        <div class="success" id="success"></div>
+    </div>
+
+    <script>
+        document.getElementById('competenciaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const success = document.getElementById('success');
+
+            // Ocultar mensajes previos
+            error.style.display = 'none';
+            success.style.display = 'none';
+
+            // Mostrar loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+
+            const formData = {
+                ciclo: document.getElementById('ciclo').value,
+                area: document.getElementById('area').value,
+                tema: document.getElementById('tema').value
+            };
+
+            try {
+                const response = await fetch('/generar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Competencias_${formData.area}_Ciclo_${formData.ciclo}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    success.textContent = '✅ Documento generado exitosamente. Descarga iniciada.';
+                    success.style.display = 'block';
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al generar el documento');
+                }
+            } catch (err) {
+                error.textContent = '❌ ' + err.message;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
