@@ -301,26 +301,23 @@ def generar_documento():
         return jsonify({'error': str(e)}), 500
 
 def generar_contenido_ia(ciclo, area, tema):
-    prompt = f'''Eres un asistente pedagógico experto en el Currículo Nacional de Educación Básica del Perú.
+   prompt = f'''
+Responde con SOLAMENTE el siguiente objeto JSON. No des ninguna explicación ni detalles adicionales. Si no sabes algún campo, pon "No encontrado".
 
-Genera información educativa para:
-- Ciclo: {ciclo}
-- Área: {area}
-- Tema: {tema}
-
-Proporciona la siguiente información en formato JSON:
 {{
-  "competencia": "Nombre completo de la competencia del área según el Currículo Nacional",
-  "capacidades": ["Capacidad 1", "Capacidad 2", "Capacidad 3"],
-  "estandar": "Estándar de aprendizaje para el ciclo {ciclo} relacionado con esta competencia",
-  "criterios": ["Criterio de evaluación 1", "Criterio de evaluación 2"],
+  "competencia": "Nombre completo de la competencia oficial del área {area} según el Currículo Nacional de Educación Básica del Perú, específico para el ciclo {ciclo} y el tema {tema}.",
+  "capacidades": ["Capacidad oficial 1", "Capacidad oficial 2", "Capacidad oficial 3"],
+  "estandar": "Estándar de aprendizaje oficial para el ciclo {ciclo} y área {area} según el Currículo Nacional, relacionado con el tema {tema}.",
+  "criterios": ["Criterio de evaluación 1 redactado como lo exige el MINEDU", "Criterio de evaluación 2 para el ciclo, área y tema solicitado"],
   "instrumento": "Lista de cotejo",
-  "competencia_transversal": "Nombre de la competencia transversal relacionada",
+  "competencia_transversal": "Competencia transversal relevante para el ciclo y área",
   "enfoque_transversal": "Nombre del enfoque transversal",
-  "descripcion_enfoque": "Breve descripción del enfoque transversal"
+  "descripcion_enfoque": "Breve descripción oficial del enfoque transversal"
 }}
 
-Asegúrate de que sea información precisa según el Currículo Nacional del Perú.'''
+Estrictamente, responde solo el objeto JSON, sin explicaciones.
+'''
+
 
     try:
         response = openai.ChatCompletion.create(
