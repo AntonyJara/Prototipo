@@ -881,49 +881,64 @@ def crear_documento_word(ciclo, area, tema, contenido):
 
     doc.add_paragraph()
 
-    # Crear tabla de cotejo
+        # Crear tabla de cotejo CON COLUMNA DE NOMBRES
     num_estudiantes = 20
     num_criterios = len(contenido.get('criterios', []))
-    tabla_cotejo = doc.add_table(rows=num_estudiantes + 2, cols=num_criterios + 1)
+    # +2 porque agregamos columna Nº y columna Nombres
+    tabla_cotejo = doc.add_table(rows=num_estudiantes + 2, cols=num_criterios + 2)
     tabla_cotejo.style = 'Table Grid'
-
-    # Encabezado con número de estudiante
-    cell_header = tabla_cotejo.rows[0].cells[0]
-    cell_header.text = 'Nº'
-    for run in cell_header.paragraphs[0].runs:
+    
+    # Encabezado: Número
+    cell_header_num = tabla_cotejo.rows[0].cells[0]
+    cell_header_num.text = 'Nº'
+    for run in cell_header_num.paragraphs[0].runs:
         run.font.bold = True
-        run.font.size = Pt(9)
-
-    # Encabezados de criterios
+        run.font.size = Pt(10)
+    
+    # Encabezado: Nombres de estudiantes
+    cell_header_nombres = tabla_cotejo.rows[0].cells[1]
+    cell_header_nombres.text = 'Nombres y Apellidos'
+    for run in cell_header_nombres.paragraphs[0].runs:
+        run.font.bold = True
+        run.font.size = Pt(10)
+    
+    # Encabezados de criterios (texto completo)
     criterios_list = contenido.get('criterios', [])
     for idx, criterio in enumerate(criterios_list):
-        cell = tabla_cotejo.rows[0].cells[idx + 1]
-        cell.text = f'Criterio {idx + 1}'
+        cell = tabla_cotejo.rows[0].cells[idx + 2]  # +2 porque está después de Nº y Nombres
+        cell.text = f'{criterio}'  # Pone el criterio completo
         for run in cell.paragraphs[0].runs:
             run.font.bold = True
             run.font.size = Pt(9)
-
+            run.font.italic = True
+    
     # Fila de subcriterios (Lo hace / No lo hace)
-    cell_sub = tabla_cotejo.rows[1].cells[0]
-    cell_sub.text = ''
+    cell_sub_num = tabla_cotejo.rows[1].cells[0]
+    cell_sub_num.text = ''
+    
+    cell_sub_nombres = tabla_cotejo.rows[1].cells[1]
+    cell_sub_nombres.text = ''
+    
     for idx in range(num_criterios):
-        cell = tabla_cotejo.rows[1].cells[idx + 1]
-        cell.text = 'Lo hace | No lo hace'
+        cell = tabla_cotejo.rows[1].cells[idx + 2]
+        cell.text = 'Lo hace\nNo lo hace'
         for run in cell.paragraphs[0].runs:
             run.font.size = Pt(8)
-
+    
     # Llenar filas con números de estudiante
     for i in range(2, num_estudiantes + 2):
         cell_num = tabla_cotejo.rows[i].cells[0]
         cell_num.text = str(i - 1)
         for run in cell_num.paragraphs[0].runs:
             run.font.size = Pt(9)
-
-    # Configurar ancho de celdas
+    
+    # Configurar ancho de celdas - IMPORTANTE
     for row in tabla_cotejo.rows:
-        row.cells[0].width = Inches(0.4)
-        for idx in range(1, len(row.cells)):
-            row.cells[idx].width = Inches(1.2)
+        row.cells[0].width = Inches(0.4)      # Columna Nº (muy pequeña)
+        row.cells[1].width = Inches(3.2)      # Columna Nombres (ANCHA)
+        for idx in range(2, len(row.cells)):
+            row.cells[idx].width = Inches(0.6)  # Columnas criterios (pequeñas para marcar)
+
 
     # Pie de página
     doc.add_paragraph()
